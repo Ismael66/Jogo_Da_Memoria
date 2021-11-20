@@ -1,4 +1,4 @@
-import { alerta } from "./Cria_alerta/alerta.js";
+import { alerta } from "./Alerta/alerta.js";
 let tempo = new Date(0, 0, 0, 0, 0, 0);
 const tabuleiro = document.querySelectorAll(".carta");
 let numCartasViradas = 0;

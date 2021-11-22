@@ -23,6 +23,8 @@ body {
     width: 100px;
     margin: 3px;
     margin-bottom: 20px;
+    transition: transform 0.8s;
+    transform-style: preserve-3d;
 }
 header {
     color: white;
@@ -47,42 +49,58 @@ footer {
 }
 .background0{
     background-color: gray;
+    transform: rotateY(180deg);
 }
 .background1{
     background-color: blue;
+    transform: rotateY(180deg);
 }
 .background2{
     background-color: green;
+    transform: rotateY(180deg);     
 }
-.background3{
+.background3{   
     background-color: pink;
+    transform: rotateY(180deg);                                                 
 }
-.background4{
+.background4{                                               
     background-color: black;
+    transform: rotateY(180deg);
 }
 .background5{
     background-color: cyan;
+    transform: rotateY(180deg);
 }
 .background6{
     background-color: brown;
+    transform: rotateY(180deg);
 }
 .background7{
     background-color: orange;
+    transform: rotateY(180deg);
 }
 .background8{
     background-color: yellow;
+    transform: rotateY(180deg);
 }
 .background9{
     background-color: purple;
+    transform: rotateY(180deg);
 }
 #myProgress {
     width: 640px;
     height: 10px;
     background-color: rgb(255, 255, 255);
     margin-bottom: 10px;
+    border-radius: 20px;
 }
 #myBar {
-    width: 1%;
+    width: 0.1%;
     height: 10px;
     background-color: green;
+    border-radius: 20px;
+
+}
+.cartaBloqueada{
+    pointer-events:none;
 }

@@ -1,11 +1,23 @@
-import { alerta } from "./Alerta/alerta.js";
-let tempo = new Date(0, 0, 0, 0, 0, 0);
+import { alerta } from "./Cria_alerta/alerta.js";
+let tempo;
 const tabuleiro = document.querySelectorAll(".carta");
 let numCartasViradas = 0;
 let idCartasViradas = [];
 let cronometro;
-let tempoCronometro;
+const tempoMaximoPartida = 60;
+let numeroJogadas;
+let jogando = false;
+let progresso;
+let arrayCartas;
+let inicioPartida;
 const start = function () {
+    jogando = true;
+    tempo = 0;
+    inicioPartida = new Date();
+    progresso = 0; 
+    numeroJogadas = 0;
+    arrayCartas = embaralhaCartas();
+    startCronometro();
     for (let i = 0; i < tabuleiro.length; i++) {
         document.getElementById(tabuleiro[i].id).onclick = () => { viraCarta(tabuleiro[i].id, i) };
     }
@@ -24,43 +36,63 @@ function geraNumerosAleatorios(min, max) {
     return Math.floor(Math.random() * (max - min) + min);
 }
 const viraCarta = function (id, indexCartas) {
-    numCartasViradas++;
-    idCartasViradas[numCartasViradas - 1] = id;
-    if (numCartasViradas === 1) revelaCartaPeloId(id, arrayCartas[indexCartas]);
-    else if (numCartasViradas === 2) {
-        revelaCartaPeloId(id, arrayCartas[indexCartas]);
-        if (idCartasViradas[0] === idCartasViradas[1]) { // clicou na mesma carta
-            numCartasViradas--;
-            return;
-        }
-        if (document.getElementById(idCartasViradas[0]).classList[1] ===
-            document.getElementById(idCartasViradas[1]).classList[1]) { // acertou as duas cartas
-            fimDeJogo();
-            resetCartasViradas();
-        }
-        else {
-            resetCartasViradas(true);
+    if (jogando) {
+        numCartasViradas++;
+        idCartasViradas[numCartasViradas - 1] = id;
+        if (numCartasViradas === 1) revelaCartaPeloId(id, arrayCartas[indexCartas]);
+        else if (numCartasViradas === 2) {
+            numeroJogadas++;
+            const carta0 = document.getElementById(idCartasViradas[0]);
+            const carta1 = document.getElementById(idCartasViradas[1]);
+            revelaCartaPeloId(id, arrayCartas[indexCartas]);
+            if (idCartasViradas[0] === idCartasViradas[1]) { // clicou na mesma carta
+                numCartasViradas--;
+                return;
+            }
+            if (carta0.classList[1] ===
+                carta1.classList[1]) { // acertou as duas cartas
+                carta0.onclick = () => { };
+                carta1.onclick = () => { };
+                resetCartasViradas();
+                fimDeJogo();
+            }
+            else {
+                resetCartasViradas(true);
+            }
         }
     }
 }
 const startCronometro = function () {
     const barraProgresso = document.getElementById("myBar");
-    let width = 1;
-    cronometro = setInterval(frame, 5);
-    tempoCronometro = setInterval(()=>{tempo.setSeconds(tempo.getSeconds() + 1);}, 1000);
-    function frame() {
-        if (width >= 100) {
-            stopCronometro();
-            alerta({ mensagem: "Você perdeu", valueBtn: "restart", funcao: resetGame });
-        } else {
-            width += 0.001;
-            barraProgresso.style.width = width + "%";
-        }
+    barraProgresso.style.backgroundColor = "green";
+    cronometro = setInterval(() => {
+        controlaBarraProgresso();
+        tempo++;
+    }, 1000);
+}
+const controlaBarraProgresso = function () {
+    const barraProgresso = document.getElementById("myBar");
+    if (tempo >= tempoMaximoPartida) {
+        stopCronometro();
+        jogando = false;
+        alerta({
+            mensagem: "Você perdeu",
+            valueBtn: "restart",
+            funcao: resetGame
+        });
+        return;
     }
+    else if (tempo >= (tempoMaximoPartida * 0.8)) {
+        barraProgresso.style.backgroundColor = "red";
+    }
+    else if (tempo >= (tempoMaximoPartida * 0.5)) {
+        barraProgresso.style.backgroundColor = "yellow";
+    }
+    progresso += (100 / tempoMaximoPartida);
+    barraProgresso.style.width = progresso + "%";
 }
 const stopCronometro = function () {
     clearInterval(cronometro);
-    clearInterval(tempoCronometro);
 }
 const resetGame = function () {
     for (let i = 0; i < tabuleiro.length; i++) {
@@ -70,9 +102,8 @@ const resetGame = function () {
             elemento.classList.add("carta", "naoVirada");
         }
     }
-    document.getElementById("myBar").style.width = 1 + "%";
-    arrayCartas = embaralhaCartas();
-    startCronometro();
+    document.getElementById("myBar").style.width = 0 + "%";
+    start();
 }
 const resetCartasViradas = function (param = false) {
     setTimeout(() => {
@@ -95,27 +126,36 @@ const revelaCartaPeloId = function (id, classFundo) {
     }
 }
 const ocultaCartaPeloId = function (id) {
-    const elemento = document.getElementById(id);
+    const elemento = document.getElementById(id)
     if (!elemento.classList.contains("naoVirada")) {
         elemento.removeAttribute("class");
         elemento.classList.add("carta", "naoVirada");
     }
 }
 const fimDeJogo = function () {
-    let numCartasViradasVitoria = 0;
+    let quantidadeAcertos = 0;
     for (let i = 0; i < tabuleiro.length; i++) {
-        if (!document.getElementById(tabuleiro[i].id).classList.contains("naoVirada")) {
-            numCartasViradasVitoria++;
-            if (numCartasViradasVitoria === tabuleiro.length) {
-                stopCronometro();
-                alerta({mensagem: "Parabens, você completou em " + tempo.getMinutes() + " minutos e " + tempo.getSeconds() + " segundos." , valueBtn: "Tentar novamente", funcao: resetGame});
-            }
-        }
-        else {
+        if (document.getElementById(tabuleiro[i].id).classList.contains("naoVirada")) {
             return;
         }
+        else{
+            quantidadeAcertos++;
+        }
+    }
+    if (quantidadeAcertos === tabuleiro.length) {
+        const tempoPartida = new Date().getTime() - inicioPartida.getTime();
+        const msg = `Parabéns, você completou em ${Math.floor((tempoPartida / 60000))}:${Math.floor(tempoPartida / 1000)},
+        com ${numeroJogadas} tentativas.`
+        stopCronometro();
+        alerta({
+            mensagem: msg,
+            valueBtn: "Tentar novamente",
+            funcao: resetGame
+        });
     }
 }
-start();
-let arrayCartas = embaralhaCartas();
-alerta({ mensagem: "Comece o jogo", valueBtn: "Start", funcao: startCronometro });
+alerta({
+    mensagem: "Comece o jogo.",
+    valueBtn: "Start",
+    funcao: start
+});

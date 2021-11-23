@@ -1,26 +1,38 @@
 import { alerta } from "./Cria_alerta/alerta.js";
 let tempo;
-const tabuleiro = document.querySelectorAll(".carta");
+const tabuleiro = document.querySelectorAll(".flipper");
+const tabuleiroBack = document.querySelectorAll(".cartaBack");
 let numCartasViradas = 0;
-let idCartasViradas = [];
+let cartasViradas = [];
 let cronometro;
 const tempoMaximoPartida = 60;
 let numeroJogadas;
 let jogando = false;
 let progresso;
-let arrayCartas;
 let inicioPartida;
 const start = function () {
     jogando = true;
     tempo = 0;
     inicioPartida = new Date();
-    progresso = 0; 
+    progresso = 0;
     numeroJogadas = 0;
-    arrayCartas = embaralhaCartas();
-    startCronometro();
+    embaralhaCartas();
     for (let i = 0; i < tabuleiro.length; i++) {
-        document.getElementById(tabuleiro[i].id).onclick = () => { viraCarta(tabuleiro[i].id, i) };
+        tabuleiro[i].style.transform = "rotateY(180deg)";
     }
+    setTimeout(() => {
+        for (let i = 0; i < tabuleiro.length; i++) {
+            tabuleiro[i].style.transform = "rotateY(0deg)";
+        }
+        setTimeout(() => {
+            for (let i = 0; i < tabuleiro.length; i++) {
+                tabuleiro[i].onclick = () => {
+                    viraCarta(tabuleiro[i], i);
+                }
+            }
+            startCronometro();
+        }, 100);
+    }, 1000);
 }
 const embaralhaCartas = function () {
     const arrayBackground = ["background0", "background0", "background1", "background1", "background2", "background2", "background3", "background3",
@@ -30,29 +42,33 @@ const embaralhaCartas = function () {
         const cartaAleatoria = geraNumerosAleatorios(0, arrayBackground.length);
         [arrayBackground[i], arrayBackground[cartaAleatoria]] = [arrayBackground[cartaAleatoria], arrayBackground[i]];
     }
-    return arrayBackground;
+    for (let i = 0; i < tabuleiro.length; i++) {
+        const elemento = tabuleiro[i].children[1].children[0];
+        elemento.classList.add(arrayBackground[i]);
+    }
 }
 function geraNumerosAleatorios(min, max) {
     return Math.floor(Math.random() * (max - min) + min);
 }
-const viraCarta = function (id, indexCartas) {
+const viraCarta = function (cartaSelecionada) {
+    const cor = cartaSelecionada.children[1].children[0].id;
     if (jogando) {
         numCartasViradas++;
-        idCartasViradas[numCartasViradas - 1] = id;
-        if (numCartasViradas === 1) revelaCartaPeloId(id, arrayCartas[indexCartas]);
+        cartasViradas[numCartasViradas - 1] = cartaSelecionada;
+        if (numCartasViradas === 1) revelaCarta(cartaSelecionada);
         else if (numCartasViradas === 2) {
             numeroJogadas++;
-            const carta0 = document.getElementById(idCartasViradas[0]);
-            const carta1 = document.getElementById(idCartasViradas[1]);
-            revelaCartaPeloId(id, arrayCartas[indexCartas]);
-            if (idCartasViradas[0] === idCartasViradas[1]) { // clicou na mesma carta
+            const carta0 = cartasViradas[0].children[1].children[0];
+            const carta1 = cartasViradas[1].children[1].children[0];
+            revelaCarta(cartaSelecionada);
+            if (carta0.id === carta1.id) { // clicou na mesma carta
                 numCartasViradas--;
                 return;
             }
             if (carta0.classList[1] ===
                 carta1.classList[1]) { // acertou as duas cartas
-                carta0.onclick = () => { };
-                carta1.onclick = () => { };
+                cartasViradas[0].onclick = null;
+                cartasViradas[1].onclick = null;
                 resetCartasViradas();
                 fimDeJogo();
             }
@@ -96,49 +112,36 @@ const stopCronometro = function () {
 }
 const resetGame = function () {
     for (let i = 0; i < tabuleiro.length; i++) {
-        const elemento = document.getElementById(tabuleiro[i].id);
-        if (!elemento.classList.contains("naoVirada")) {
-            elemento.removeAttribute("class");
-            elemento.classList.add("carta", "naoVirada");
-        }
+        tabuleiro[i].style.transform = "rotateY(0deg)";
     }
+    setTimeout(start, 2000);
     document.getElementById("myBar").style.width = 0 + "%";
-    start();
 }
 const resetCartasViradas = function (param = false) {
     setTimeout(() => {
         if (param === true) {
-            ocultaCartaPeloId(idCartasViradas[0]);
-            ocultaCartaPeloId(idCartasViradas[1]);
+            ocultaCarta();
         }
-        idCartasViradas[0] = 0;
-        idCartasViradas[1] = 0;
+        cartasViradas[0] = 0;
+        cartasViradas[1] = 0;
         numCartasViradas = 0;
     }, 500);
 }
-const revelaCartaPeloId = function (id, classFundo) {
-    const elemento = document.getElementById(id);
-    if (elemento.classList.contains("naoVirada")) {
-        elemento.classList.remove("naoVirada");
-    }
-    if (!elemento.classList.contains(classFundo)) {
-        elemento.classList.add(classFundo);
-    }
+const revelaCarta = function (cartaSelecionada) {
+    cartaSelecionada.style.transform = "rotateY(180deg)";
 }
-const ocultaCartaPeloId = function (id) {
-    const elemento = document.getElementById(id)
-    if (!elemento.classList.contains("naoVirada")) {
-        elemento.removeAttribute("class");
-        elemento.classList.add("carta", "naoVirada");
-    }
+const ocultaCarta = function () {
+    cartasViradas[0].style.transform = "rotateY(0deg)";
+    cartasViradas[1].style.transform = "rotateY(0deg)";
 }
 const fimDeJogo = function () {
     let quantidadeAcertos = 0;
     for (let i = 0; i < tabuleiro.length; i++) {
-        if (document.getElementById(tabuleiro[i].id).classList.contains("naoVirada")) {
+        console.log(tabuleiro[i].onclick);
+        if (tabuleiro[i].onclick !== null) {
             return;
         }
-        else{
+        else {
             quantidadeAcertos++;
         }
     }

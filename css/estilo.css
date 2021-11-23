@@ -6,6 +6,13 @@ body {
     display: flex;
     justify-content: space-between;
     flex-direction: column;
+    position: relative;
+}
+.containerCartas{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
 }
 .containerCronometro{
     display: flex;
@@ -14,17 +21,46 @@ body {
     align-items: center;
 }
 .container1{
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+    position: relative;
+    width: 100%;
+	height: 100%;
 }
+.flipper{
+    position: relative;
+	width: 100%;
+	height: 100%;
+    transition: transform 0.8s;
+	transform-style: preserve-3d;
+}
+.back{
+	transform: rotateY(180deg);
+}
+.front, .back{
+	position: absolute;
+	width: 100%;
+	height: 100%;
+    backface-visibility: hidden;
+}
+.flip-container {
+    display: flex;
+    width: 100px;
+    height: 100px;
+    perspective: 1000px;
+  }
 .carta{
     height: 100px;
     width: 100px;
-    margin: 3px;
-    margin-bottom: 20px;
+    background-color: rgba(255, 0, 0, 0.747);
+    margin-bottom: 5px;
     transition: transform 0.8s;
-    transform-style: preserve-3d;
+	transform-style: preserve-3d;
+}
+.cartaBack{
+    height: 100px;
+    width: 100px;
+    margin-bottom: 5px;
+    transition: transform 0.8s;
+	transform-style: preserve-3d;
 }
 header {
     color: white;
@@ -44,48 +80,35 @@ footer {
     text-align: center;
     font-style: italic;
 }
-.naoVirada{
-    background-color: red;
-}
 .background0{
     background-color: gray;
-    transform: rotateY(180deg);
 }
 .background1{
     background-color: blue;
-    transform: rotateY(180deg);
 }
 .background2{
-    background-color: green;
-    transform: rotateY(180deg);     
+    background-color: green;     
 }
 .background3{   
-    background-color: pink;
-    transform: rotateY(180deg);                                                 
+    background-color: pink;                                                 
 }
 .background4{                                               
     background-color: black;
-    transform: rotateY(180deg);
 }
 .background5{
     background-color: cyan;
-    transform: rotateY(180deg);
 }
 .background6{
     background-color: brown;
-    transform: rotateY(180deg);
 }
 .background7{
     background-color: orange;
-    transform: rotateY(180deg);
 }
 .background8{
     background-color: yellow;
-    transform: rotateY(180deg);
 }
 .background9{
     background-color: purple;
-    transform: rotateY(180deg);
 }
 #myProgress {
     width: 640px;
@@ -99,7 +122,6 @@ footer {
     height: 10px;
     background-color: green;
     border-radius: 20px;
-
 }
 .cartaBloqueada{
     pointer-events:none;

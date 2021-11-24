@@ -20,6 +20,33 @@ body {
     flex-direction: column;
     align-items: center;
 }
+.containerContagens{
+    display: flex;
+    justify-content: center;
+}
+#cronometro{
+    margin-right: 300px;
+}
+.hidden{
+    visibility: hidden;
+}
+#inputsPlacar{
+    display: flex;
+    height: 100%;
+    background-color: lawngreen;
+    align-items: flex-end;
+    flex-direction: row;
+}
+.placar{
+    margin-left: 70px;
+    position: absolute;
+    width: 200px;
+    height: 300px;
+    background-color: crimson;
+}
+#placar{
+    text-align: center;
+}
 .container1{
     position: relative;
     width: 100%;

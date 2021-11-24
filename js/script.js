@@ -1,19 +1,21 @@
 import { alerta } from "./Cria_alerta/alerta.js";
 let tempo;
 const tabuleiro = document.querySelectorAll(".flipper");
-const tabuleiroBack = document.querySelectorAll(".cartaBack");
 let numCartasViradas = 0;
 let cartasViradas = [];
 let cronometro;
+let quantidadeAcertos;
 const tempoMaximoPartida = 60;
 let numeroJogadas;
 let jogando = false;
 let progresso;
-let inicioPartida;
+let inicioPartida = new Date(0, 0, 0, 0, 0, 0)
 const start = function () {
+    document.getElementById("cronometro").innerHTML = `00:00`;
+    document.getElementById("jogadas").innerHTML = `0 JOGADAS`;
     jogando = true;
     tempo = 0;
-    inicioPartida = new Date();
+    inicioPartida = new Date(0, 0, 0, 0, 0, 0);
     progresso = 0;
     numeroJogadas = 0;
     embaralhaCartas();
@@ -44,6 +46,9 @@ const embaralhaCartas = function () {
     }
     for (let i = 0; i < tabuleiro.length; i++) {
         const elemento = tabuleiro[i].children[1].children[0];
+        if (elemento.classList.length > 1) {
+            elemento.classList.remove(elemento.classList.item("1"));
+        }
         elemento.classList.add(arrayBackground[i]);
     }
 }
@@ -58,6 +63,7 @@ const viraCarta = function (cartaSelecionada) {
         if (numCartasViradas === 1) revelaCarta(cartaSelecionada);
         else if (numCartasViradas === 2) {
             numeroJogadas++;
+            document.getElementById("jogadas").innerHTML = `${numeroJogadas} JOGADAS`;
             const carta0 = cartasViradas[0].children[1].children[0];
             const carta1 = cartasViradas[1].children[1].children[0];
             revelaCarta(cartaSelecionada);
@@ -83,7 +89,9 @@ const startCronometro = function () {
     barraProgresso.style.backgroundColor = "green";
     cronometro = setInterval(() => {
         controlaBarraProgresso();
+        inicioPartida.setSeconds(inicioPartida.getSeconds() + 1);
         tempo++;
+        document.getElementById("cronometro").innerHTML = `${inicioPartida.getMinutes().toLocaleString('pt', { minimumIntegerDigits: 2 })}:${inicioPartida.getSeconds().toLocaleString('pt', { minimumIntegerDigits: 2 })}`;
     }, 1000);
 }
 const controlaBarraProgresso = function () {
@@ -135,9 +143,8 @@ const ocultaCarta = function () {
     cartasViradas[1].style.transform = "rotateY(0deg)";
 }
 const fimDeJogo = function () {
-    let quantidadeAcertos = 0;
+    quantidadeAcertos = 0;
     for (let i = 0; i < tabuleiro.length; i++) {
-        console.log(tabuleiro[i].onclick);
         if (tabuleiro[i].onclick !== null) {
             return;
         }
@@ -146,17 +153,68 @@ const fimDeJogo = function () {
         }
     }
     if (quantidadeAcertos === tabuleiro.length) {
-        const tempoPartida = new Date().getTime() - inicioPartida.getTime();
-        const msg = `Parabéns, você completou em ${Math.floor((tempoPartida / 60000))}:${Math.floor(tempoPartida / 1000)},
-        com ${numeroJogadas} tentativas.`
         stopCronometro();
+        escondeMostraInputsPlacar();
+    }
+}
+const escondeMostraInputsPlacar = function () {
+    document.querySelector("#inputsPlacar").classList.toggle("hidden");
+}
+const registraPessoaPlacar = function (nickname) {
+    const recorde = `<tr><td>${nickname.toUpperCase()}</td><td>${inicioPartida.getMinutes().toLocaleString('pt', { minimumIntegerDigits: 2 })}:${inicioPartida.getSeconds().toLocaleString('pt', { minimumIntegerDigits: 2 })}</td><td>${numeroJogadas}</td></tr>`
+    guardaMemoria(recorde);
+    imprimePlacar();
+}
+const guardaMemoria = function (recorde) {
+    const memoria = localStorage.getItem("game");
+    if (memoria !== null) {
+        try {
+            const arrayLocal = JSON.parse(memoria);
+            if (typeof arrayLocal === "object" && typeof arrayLocal.length !== "undefined") {
+                arrayLocal.push(recorde);
+                localStorage.setItem("game", JSON.stringify(arrayLocal));
+            }
+            else {
+                localStorage.setItem("game", JSON.stringify(new Array));
+                guardaMemoria(recorde);
+            }
+        } catch (error) {
+            localStorage.setItem("game", JSON.stringify(new Array));
+            guardaMemoria(recorde);
+        }
+    }
+    else {
+        localStorage.setItem("game", JSON.stringify(new Array));
+        guardaMemoria(recorde);
+    }
+}
+const imprimePlacar = function () {
+    const local = localStorage.getItem("game");
+    if (local !== null) {
+        try {
+            const arrayLocal = JSON.parse(local);
+            if (typeof arrayLocal === "object") {
+                document.getElementById("placar").innerHTML = arrayLocal.join("");
+            }
+        } catch (error) {
+            localStorage.setItem("game", JSON.stringify(new Array));
+        }
+    }
+}
+document.getElementById("btnPlacar").onclick = () => {
+    const nickname = document.getElementById("nicknamePlacar").value;
+    registraPessoaPlacar(nickname);
+    escondeMostraInputsPlacar();
+    if (quantidadeAcertos === tabuleiro.length) {
         alerta({
-            mensagem: msg,
+            mensagem: "Parabéns, você ganhou",
             valueBtn: "Tentar novamente",
             funcao: resetGame
         });
     }
 }
+imprimePlacar();
+// escondeMostraInputsPlacar();
 alerta({
     mensagem: "Comece o jogo.",
     valueBtn: "Start",

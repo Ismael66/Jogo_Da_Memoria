@@ -32,25 +32,50 @@ body {
 }
 #inputsPlacar{
     display: flex;
-    height: 100%;
-    background-color: lawngreen;
     align-items: flex-end;
     flex-direction: row;
 }
+table, th, td {
+    border: 1px solid black;
+    border-style: dotted;
+}
 .placar{
+    display: flex;
     margin-left: 70px;
     position: absolute;
-    width: 200px;
+    width: 252px;
     height: 300px;
     background-color: crimson;
+    flex-direction: column;
 }
-#placar{
+.placarRecordes{
+    height: 256px;
     text-align: center;
 }
 .container1{
     position: relative;
     width: 100%;
 	height: 100%;
+}
+#nicknamePlacar{
+    width: 150px;
+}
+a:hover{
+    color: rgb(56, 56, 204);
+    text-decoration: underline;
+}
+a{
+    cursor: pointer;
+}
+.containerPaginacao{
+    display: flex;
+    justify-content: end;
+    background-color: brown;
+}
+.containerBtnPaginacao{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
 }
 .flipper{
     position: relative;

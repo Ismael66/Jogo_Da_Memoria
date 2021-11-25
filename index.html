@@ -16,7 +16,7 @@
     </div>
     <div class="containerPlacar">
         <div class="placar">
-            <table>
+            <table class="placarRecordes">
                 <thead>
                     <tr>
                         <th>NOME</th>
@@ -27,9 +27,16 @@
                 <tbody id="placar">
                 </tbody>
             </table>
-            <div id="inputsPlacar" class="hidden">
-                <input type="text" id="nicknamePlacar" placeholder="AAA" maxlength="3">
-                <input type="button" id="btnPlacar" value="registrar">
+            <div class="containerBotoes">
+                <div id="inputsPlacar" class="hidden">
+                    <input type="text" id="nicknamePlacar" placeholder="AAA" maxlength="3">
+                    <input type="button" id="btnPlacar" value="REGISTRAR">
+                </div>
+                <div class="containerBtnPaginacao">
+                    <input type="button" value="&lt;" id="btnAnterior" disabled>
+                    <div id="btnPaginacao"></div>
+                    <input type="button" value=">" id="btnProximo" disabled>
+                </div>
             </div>
         </div>
     </div>

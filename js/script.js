@@ -9,7 +9,8 @@ const tempoMaximoPartida = 60;
 let numeroJogadas;
 let jogando = false;
 let progresso;
-let inicioPartida = new Date(0, 0, 0, 0, 0, 0)
+let inicioPartida = new Date(0, 0, 0, 0, 0, 0);
+let paginaAtual = 0;
 const start = function () {
     document.getElementById("cronometro").innerHTML = `00:00`;
     document.getElementById("jogadas").innerHTML = `0 JOGADAS`;
@@ -164,6 +165,7 @@ const registraPessoaPlacar = function (nickname) {
     const recorde = `<tr><td>${nickname.toUpperCase()}</td><td>${inicioPartida.getMinutes().toLocaleString('pt', { minimumIntegerDigits: 2 })}:${inicioPartida.getSeconds().toLocaleString('pt', { minimumIntegerDigits: 2 })}</td><td>${numeroJogadas}</td></tr>`
     guardaMemoria(recorde);
     imprimePlacar();
+
 }
 const guardaMemoria = function (recorde) {
     const memoria = localStorage.getItem("game");
@@ -194,14 +196,14 @@ const imprimePlacar = function () {
         try {
             const arrayLocal = JSON.parse(local);
             if (typeof arrayLocal === "object") {
-                document.getElementById("placar").innerHTML = arrayLocal.join("");
+                criaBtnPaginacaoRecorde(arrayLocal);
             }
         } catch (error) {
             localStorage.setItem("game", JSON.stringify(new Array));
         }
     }
 }
-document.getElementById("btnPlacar").onclick = () => {
+document.querySelector("#btnPlacar").onclick = () => {
     const nickname = document.getElementById("nicknamePlacar").value;
     registraPessoaPlacar(nickname);
     escondeMostraInputsPlacar();
@@ -213,8 +215,65 @@ document.getElementById("btnPlacar").onclick = () => {
         });
     }
 }
+const criaBtnPaginacaoRecorde = function (arrayLocal) {
+    let paginas = Math.ceil(arrayLocal.length / 5);
+    let arrayBtnPaginas = [];
+    let arrayBtnPaginasHtml = [];
+    paginas = paginas < 1 ? 1 : paginas;
+    for (let i = 1; i <= paginas; i++) {
+        arrayBtnPaginas.push(`btnPagina${i}`);
+        if (i !== paginas) {
+            arrayBtnPaginasHtml.push(`<a id="btnPagina${i}"> ${i} -</a>`);
+        }
+        else{
+            arrayBtnPaginasHtml.push(`<a id="btnPagina${i}"> ${i}</a>`);
+        }
+    }
+    document.querySelector("#btnPaginacao").innerHTML = arrayBtnPaginasHtml.join("");
+    document.getElementById("placar").innerHTML = criaPaginacao(arrayLocal, 1, 5);
+    atualizaBtnNumericos(arrayBtnPaginas, arrayLocal);
+}
+const atualizaBtnNumericos = function(arrayBtnPaginas, arrayLocal) {
+    for (const key in arrayBtnPaginas) {
+        const btn = document.getElementById(arrayBtnPaginas[key]);
+        btn.onclick = function () {
+            paginaAtual = parseInt(key) + 1;
+            document.getElementById("placar").innerHTML = criaPaginacao(arrayLocal, paginaAtual, 5);
+        }
+    }
+    onclickBtnAnteriorProximo(arrayLocal)
+}
+const onclickBtnAnteriorProximo = function (arrayLocal) {
+    let paginas = Math.ceil(arrayLocal.length / 5);
+    const btnAnterior = document.getElementById("btnAnterior");
+    const btnProximo = document.getElementById("btnProximo");
+    btnAnterior.onclick = () => {
+        if (paginaAtual < paginas) {
+            document.getElementById("placar").innerHTML = criaPaginacao(arrayLocal, paginaAtual++, 5);
+        }
+    }
+    btnProximo.onclick = () => {
+        if (paginaAtual > 1) {
+            document.getElementById("placar").innerHTML = criaPaginacao(arrayLocal, paginaAtual--, 5);
+        }
+    }
+}
+const criaPaginacao = function (itens, paginaAtual, limiteItensPagina) {
+    let result = [];
+    let TotalPaginas = Math.ceil(itens.length / limiteItensPagina);
+    let contador = (paginaAtual * limiteItensPagina) - limiteItensPagina;
+    let delimitadorItensPagina = contador + limiteItensPagina;
+    if (paginaAtual <= TotalPaginas) {
+        for (let i = contador; i < delimitadorItensPagina; i++) {
+            if (itens[i] != null)
+                result.push(itens[i]);
+            contador++;
+        }
+    }
+    return result.join("");
+}
 imprimePlacar();
-// escondeMostraInputsPlacar();
+escondeMostraInputsPlacar();
 alerta({
     mensagem: "Comece o jogo.",
     valueBtn: "Start",
